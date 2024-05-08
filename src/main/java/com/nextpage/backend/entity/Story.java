@@ -8,7 +8,6 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Node
 @Getter
@@ -26,7 +25,8 @@ public class Story {
     private Story parentId;
 
     // 해당 노드를 부모로 가지는 관계 : child
-    private List<Story> childId;
+//    @Relationship(type = "CHILD_OF", direction = Relationship.Direction.INCOMING)
+//    private List<Story> childId;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -43,18 +43,20 @@ public class StoryService {
     public StoryDetailsResponseDTO getStoryDetails(Long storyId) { // 스토리 상세 조회
         Story story = storyRepository.findById(storyId)
                 .orElseThrow(StoryNotFoundException::new);
-        Long parentId = story.getParentId() != null ? story.getParentId().getId() : null;
         // 스토리 내용을 포함한 응답 객체 생성
-        return StoryDetailsResponseDTO.of(story, parentId, getChildIds(story), getChildContents(story));
+        return StoryDetailsResponseDTO.of(story, story.getParentId().getId(), getChildIds(story),getChildContents(story));
     }
 
     public List<Long> getChildIds(Story story) {
-        return story.getChildId().stream().map(Story::getId).collect(Collectors.toList());
+//        return story.getChildId().stream().map(Story::getId).collect(Collectors.toList());
+        return storyRepository.findChildByParentId(story.getId()).stream().map(Story::getId).collect(Collectors.toList());
     }
 
     public List<String> getChildContents(Story story) {
-        return story.getChildId().stream().map(Story::getContent).collect(Collectors.toList());
+//        return story.getChildId().stream().map(Story::getContent).collect(Collectors.toList());
+        return storyRepository.findChildByParentId(story.getId()).stream().map(Story::getContent).collect(Collectors.toList());
     }
+
 
     public void generateStory(StorySaveRequest request, Long parentId, HttpServletRequest httpServletRequest) {
         String userNickname = getUserNickname(httpServletRequest);
