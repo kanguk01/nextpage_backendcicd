@@ -91,7 +91,7 @@ public class StoryService {
         }
         Collections.reverse(stories);
         if (stories.isEmpty()) {
-            throw new NoSuchElementException("스토리가 존재하지 않습니다.");
+            throw new StoryNotFoundException();
         }
         return stories;
     }
@@ -103,13 +103,13 @@ public class StoryService {
             StoryListResponseDTO storyListResponseDTO = new StoryListResponseDTO(
                     story.getId(),
                     story.getContent(),
-                    story.getUserNickname(),
-                    story.getImageUrl()
-            ); //각 자식 스토리의 새로운 DTO객체 생성
+                    story.getImageUrl(),
+                    story.getUserNickname()
+                    ); //각 자식 스토리의 새로운 DTO객체 생성
             stories.add(storyListResponseDTO); //모든 필요한 부분을 채운 객체를 추가한다.
         }
         Collections.reverse(stories);
-        if (stories.isEmpty()) { throw new NoSuchElementException("스토리가 존재하지 않습니다."); }
+        if (stories.isEmpty()) { throw new StoryNotFoundException(); }
         return stories;
     }
 
