@@ -17,8 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 
 @Slf4j
@@ -34,8 +36,8 @@ public class StoryService {
     public List<RootResponseDTO> getRootStories() {
         List<Story> rootStories = storyRepository.findRootStories();
         List<RootResponseDTO> rootStoriesList = rootStories.stream()
-                .map(story -> RootResponseDTO.of(story))
-                .collect(Collectors.toList()); // 루트 스토리 목록 리스트 생성
+                .map(RootResponseDTO::of)
+                .toList(); // 루트 스토리 목록 리스트 생성
         if (rootStoriesList.isEmpty()) { throw new StoryNotFoundException(); }
         return rootStoriesList;
     }
@@ -49,11 +51,11 @@ public class StoryService {
     }
 
     public List<Long> getChildIds(Story story) {
-        return story.getChildId().stream().map(Story::getId).collect(Collectors.toList());
+        return storyRepository.findChildByParentId(story.getId()).stream().map(Story::getId).toList();
     }
 
     public List<String> getChildContents(Story story) {
-        return story.getChildId().stream().map(Story::getContent).collect(Collectors.toList());
+        return storyRepository.findChildByParentId(story.getId()).stream().map(Story::getContent).toList();
     }
 
     public void generateStory(StorySaveRequest request, Long parentId, HttpServletRequest httpServletRequest) {
@@ -67,7 +69,7 @@ public class StoryService {
         // 토큰에서 userId 추출 후 닉네임 조회
         Long userId = tokenService.getUserIdFromToken(httpServletRequest);
         return userRepository.findNicknameById(userId)
-                .orElseThrow(() -> new UserNotFoundException());
+                .orElseThrow(UserNotFoundException::new);
     }
 
     private Story getParentById(Long parentId) {
@@ -87,7 +89,6 @@ public class StoryService {
             ); //각 자식 스토리의 새로운 DTO객체 생성
             stories.add(scenarioResponseDTO); //모든 필요한 부분을 채운 객체를 추가한다.
         }
-        Collections.reverse(stories);
         if (stories.isEmpty()) {
             throw new StoryNotFoundException();
         }
