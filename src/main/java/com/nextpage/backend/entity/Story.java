@@ -20,7 +20,7 @@ public class Story {
     private String content;
     private String imageUrl;
 
-    // 해당 노드의 부모 관계 설정
+    // 해당 노드를 자식으로 가지는 관계 : parent
     @Relationship(type = "PARENT_OF", direction = Relationship.Direction.INCOMING)
     private Story parentId;
 
