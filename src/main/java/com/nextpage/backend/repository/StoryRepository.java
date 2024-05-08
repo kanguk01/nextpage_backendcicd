@@ -19,12 +19,12 @@ public interface StoryRepository extends Neo4jRepository<Story,Long> {
     @Query("MATCH p=(root:Story)-[:PARENT_OF*0..]->(child:Story) WHERE ID(root) = $rootId RETURN nodes(p)")
     List<Story> findAllChildrenByRootId(Long rootId);
 
-    // 해당 스토리의 부모 스토리 id 가져오기.
+    // 해당 스토리의 부모 스토리 id 가져오기
     @Query("MATCH (child:Story)-[:PARENT_OF]->(parent:Story) WHERE ID(parent) = $childId RETURN child")
     Optional<Story> findParentByChildId(Long childId);
 
     // 해당 스토리의 모든 자식을 가져오기
-    @Query("MATCH (parent:Story)-[:PARENT_OF]->(child:Story) WHERE id(parent) = $parentId RETURN child")
+    @Query("MATCH (parent:Story)-[:PARENT_OF]->(child:Story) WHERE ID(parent) = $parentId RETURN child")
     List<Story> findChildByParentId(Long parentId);
 
     // 특정 분기 조회를 위한 해당 스토리의 부모 재귀적으로 가져오기
