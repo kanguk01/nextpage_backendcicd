@@ -89,7 +89,6 @@ public class StoryService {
             ); //각 자식 스토리의 새로운 DTO객체 생성
             stories.add(scenarioResponseDTO); //모든 필요한 부분을 채운 객체를 추가한다.
         }
-        Collections.reverse(stories);
         if (stories.isEmpty()) {
             throw new StoryNotFoundException();
         }
