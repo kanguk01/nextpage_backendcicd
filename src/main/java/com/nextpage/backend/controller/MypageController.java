@@ -1,23 +1,25 @@
 package com.nextpage.backend.controller;
 
-import com.nextpage.backend.dto.response.ApiResponse;
+import com.nextpage.backend.config.jwt.TokenService;
 import com.nextpage.backend.dto.response.StoryListResponseDTO;
+import com.nextpage.backend.error.exception.user.UserNotFoundException;
+import com.nextpage.backend.repository.UserRepository;
 import com.nextpage.backend.result.ResultResponse;
 import com.nextpage.backend.service.MypageService;
+import com.nextpage.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpStatus;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.nextpage.backend.result.ResultCode.MYPAGE_MYSTORY_LIST_SUCCESS;
-import static com.nextpage.backend.result.ResultCode.STORY_LIST_SUCCESS;
 
 @Tag(name = "Mypage", description = "Mypage 관리")
 @RestController
@@ -25,15 +27,22 @@ import static com.nextpage.backend.result.ResultCode.STORY_LIST_SUCCESS;
 public class MypageController {
 
     private final MypageService mypageService;
+    private final TokenService tokenService;
+    private final UserRepository userRepository;
 
-    public MypageController(MypageService mypageService) {
+
+    public MypageController(MypageService mypageService, UserService userService, TokenService tokenService, UserRepository userRepository) {
         this.mypageService = mypageService;
+        this.tokenService = tokenService;
+        this.userRepository = userRepository;
     }
 
     @Operation(summary = "내가 쓴 스토리 조회", description = "특정 닉네임의 스토리를 조회합니다.")
-    @Parameter(name = "nickname", description = "조회할 스토리들의 작성자 닉네임")
-    @GetMapping("/mystories/{nickname}") // 특정 분기 조회
-    public ResponseEntity<ResultResponse> getStoriesByNickname(@PathVariable String nickname) {
+    @GetMapping("/mystories") // 특정 분기 조회
+    public ResponseEntity<ResultResponse> getStoriesByNickname(HttpServletRequest request) {
+        Long userId = tokenService.getUserIdFromToken(request);
+        String nickname = userRepository.findNicknameById(userId)
+                .orElseThrow(UserNotFoundException::new);
         List<StoryListResponseDTO> storiesByNickname = mypageService.getStoriesByNickname(nickname);
         return ResponseEntity.ok(ResultResponse.of(MYPAGE_MYSTORY_LIST_SUCCESS, storiesByNickname));
     }
