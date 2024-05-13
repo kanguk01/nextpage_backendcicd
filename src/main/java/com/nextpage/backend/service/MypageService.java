@@ -1,11 +1,13 @@
 package com.nextpage.backend.service;
 
+import com.nextpage.backend.config.jwt.TokenService;
 import com.nextpage.backend.dto.response.StoryListResponseDTO;
 import com.nextpage.backend.entity.Story;
 import com.nextpage.backend.error.exception.story.StoryNotFoundException;
 import com.nextpage.backend.error.exception.user.UserNotFoundException;
 import com.nextpage.backend.repository.StoryRepository;
 import com.nextpage.backend.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,13 +18,18 @@ import java.util.List;
 public class MypageService {
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;
+    private final TokenService tokenService;
 
-    public MypageService(StoryRepository storyRepository, UserRepository userRepository) {
+    public MypageService(StoryRepository storyRepository, UserRepository userRepository, TokenService tokenService) {
         this.storyRepository = storyRepository;
         this.userRepository = userRepository;
+        this.tokenService = tokenService;
     }
 
-    public List<StoryListResponseDTO> getStoriesByNickname(String nickname) { //내가 작성한 스토리 조회
+    public List<StoryListResponseDTO> getStoriesByNickname(HttpServletRequest request) { //내가 작성한 스토리 조회
+        Long userId = tokenService.getUserIdFromToken(request);
+        String nickname = userRepository.findNicknameById(userId)
+                .orElseThrow(UserNotFoundException::new);
         List<Story> result= storyRepository.findStoriesByNickname(nickname);
         if(!userRepository.existsByNickname(nickname)) {
             throw new UserNotFoundException();
