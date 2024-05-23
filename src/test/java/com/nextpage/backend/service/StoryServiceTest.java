@@ -1,10 +1,12 @@
 package com.nextpage.backend.service;
 
 import com.nextpage.backend.config.jwt.TokenService;
+import com.nextpage.backend.dto.request.StorySaveRequest;
 import com.nextpage.backend.dto.response.RootResponseDTO;
 import com.nextpage.backend.dto.response.StoryDetailsResponseDTO;
 import com.nextpage.backend.entity.Story;
 import com.nextpage.backend.error.exception.story.StoryNotFoundException;
+import com.nextpage.backend.error.exception.user.UserNotFoundException;
 import com.nextpage.backend.repository.StoryRepository;
 import com.nextpage.backend.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -112,5 +114,31 @@ class StoryServiceTest {
         when(storyRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(StoryNotFoundException.class, () -> storyService.getStoryDetails(1L));
+    }
+
+    @DisplayName("스토리 생성 -> 성공")
+    @Test
+    void generateStory_성공() {
+        StorySaveRequest request = new StorySaveRequest("imageUrl", "content");
+
+        when(tokenService.getUserIdFromToken(this.request)).thenReturn(1L);
+        when(userRepository.findNicknameById(1L)).thenReturn(Optional.of("testNickname"));
+        when(imageService.uploadImageToS3("imageUrl")).thenReturn("s3Url");
+        when(storyRepository.findById(parentStory.getId())).thenReturn(Optional.of(parentStory));
+
+        storyService.generateStory(request, parentStory.getId(), this.request);
+
+        verify(storyRepository, times(1)).save(any(Story.class));
+    }
+
+    @DisplayName("스토리 생성 -> 존재하지 않는 유저")
+    @Test
+    void generateStory_존재하지_않는_유저() {
+        StorySaveRequest request = new StorySaveRequest("imageUrl", "content");
+
+        when(tokenService.getUserIdFromToken(this.request)).thenReturn(1L);
+        when(userRepository.findNicknameById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> storyService.generateStory(request, parentStory.getId(), this.request));
     }
 }
