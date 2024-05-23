@@ -1,6 +1,7 @@
 package com.nextpage.backend.entity;
 
 
+import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
@@ -29,6 +30,18 @@ public class Story {
     private Boolean isDeleted;
 
     public Story(final String content, final String imageUrl, LocalDateTime createdAt, LocalDateTime updatedAt, boolean isDeleted, String userNickname, Story parentId) {
+        this.content = content;
+        this.imageUrl = imageUrl;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.isDeleted = isDeleted;
+        this.userNickname = userNickname;
+        this.parentId = parentId;
+    }
+
+    @Builder
+    public Story(Long id, String content, String imageUrl, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean isDeleted, String userNickname, Story parentId) {
+        this.id = id;
         this.content = content;
         this.imageUrl = imageUrl;
         this.createdAt = createdAt;
