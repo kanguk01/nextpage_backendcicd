@@ -5,6 +5,7 @@ import com.nextpage.backend.dto.request.StorySaveRequest;
 import com.nextpage.backend.dto.response.RootResponseDTO;
 import com.nextpage.backend.dto.response.ScenarioResponseDTO;
 import com.nextpage.backend.dto.response.StoryDetailsResponseDTO;
+import com.nextpage.backend.dto.response.StoryListResponseDTO;
 import com.nextpage.backend.entity.Story;
 import com.nextpage.backend.error.exception.story.StoryNotFoundException;
 import com.nextpage.backend.error.exception.user.UserNotFoundException;
@@ -163,5 +164,32 @@ class StoryServiceTest {
         when(storyRepository.findAllChildrenByRootId(2L)).thenReturn(Collections.emptyList());
 
         assertThrows(StoryNotFoundException.class, () -> storyService.getStoriesByRootId(2L));
+    }
+
+    @DisplayName("특정 분기 조회 -> 성공")
+    @Test
+    void getStoriesByleafId_성공() {
+        List<Story> stories = Arrays.asList(story, parentStory);
+        when(storyRepository.findRecursivelyByLeafId(1L)).thenReturn(stories);
+
+        List<StoryListResponseDTO> result = storyService.getStoriesByleafId(1L);
+
+        assertThat(result).isNotEmpty();
+
+        assertThat(result.get(0).getId()).isEqualTo(parentStory.getId());
+        assertThat(result.get(0).getUserNickname()).isEqualTo(parentStory.getUserNickname());
+
+        assertThat(result.get(1).getId()).isEqualTo(story.getId());
+        assertThat(result.get(1).getUserNickname()).isEqualTo(story.getUserNickname());
+
+        verify(storyRepository, times(1)).findRecursivelyByLeafId(1L);
+    }
+
+    @DisplayName("특정 분기 조회 -> 존재하지 않는 스토리")
+    @Test
+    void getStoriesByleafId_존재하지_않는_스토리() {
+        when(storyRepository.findRecursivelyByLeafId(1L)).thenReturn(Collections.emptyList());
+
+        assertThrows(StoryNotFoundException.class, () -> storyService.getStoriesByleafId(1L));
     }
 }
