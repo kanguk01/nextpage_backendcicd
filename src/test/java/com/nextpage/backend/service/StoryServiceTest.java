@@ -3,6 +3,7 @@ package com.nextpage.backend.service;
 import com.nextpage.backend.config.jwt.TokenService;
 import com.nextpage.backend.dto.request.StorySaveRequest;
 import com.nextpage.backend.dto.response.RootResponseDTO;
+import com.nextpage.backend.dto.response.ScenarioResponseDTO;
 import com.nextpage.backend.dto.response.StoryDetailsResponseDTO;
 import com.nextpage.backend.entity.Story;
 import com.nextpage.backend.error.exception.story.StoryNotFoundException;
@@ -140,5 +141,27 @@ class StoryServiceTest {
         when(userRepository.findNicknameById(1L)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> storyService.generateStory(request, parentStory.getId(), this.request));
+    }
+
+    @DisplayName("루트 ID로 시나리오 조회 -> 성공")
+    @Test
+    void getStoriesByRootId_성공() {
+        when(storyRepository.findAllChildrenByRootId(2L)).thenReturn(Arrays.asList(story, parentStory));
+
+        List<ScenarioResponseDTO> scenarios = storyService.getStoriesByRootId(2L);
+
+        assertThat(scenarios).isNotEmpty();
+        assertThat(scenarios.size()).isEqualTo(2);
+        assertThat(scenarios.get(0).getId()).isEqualTo(story.getId());
+        assertThat(scenarios.get(1).getId()).isEqualTo(parentStory.getId());
+        verify(storyRepository, times(1)).findAllChildrenByRootId(2L);
+    }
+
+    @DisplayName("루트 ID로 시나리오 조회 -> 존재하지 않는 시나리오")
+    @Test
+    void getStoriesByRootId_존재하지_않는_시나리오() {
+        when(storyRepository.findAllChildrenByRootId(2L)).thenReturn(Collections.emptyList());
+
+        assertThrows(StoryNotFoundException.class, () -> storyService.getStoriesByRootId(2L));
     }
 }
