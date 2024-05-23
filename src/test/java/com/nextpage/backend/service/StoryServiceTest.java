@@ -93,5 +93,24 @@ class StoryServiceTest {
         assertThrows(StoryNotFoundException.class, () -> storyService.getRootStories());
     }
 
+    @DisplayName("스토리 상세 조회 -> 성공")
+    @Test
+    void getStoryDetails_성공() {
+        when(storyRepository.findById(1L)).thenReturn(Optional.of(story));
+        when(storyRepository.findChildByParentId(1L)).thenReturn(Arrays.asList(story));
 
+        StoryDetailsResponseDTO storyDetails = storyService.getStoryDetails(1L);
+
+        assertThat(storyDetails).isNotNull();
+        assertThat(storyDetails.getId()).isEqualTo(story.getId());
+        verify(storyRepository, times(1)).findById(1L);
+    }
+
+    @DisplayName("스토리 상세 조회 -> 존재하지 않는 스토리")
+    @Test
+    void getStoryDetails_존재하지_않는_스토리() {
+        when(storyRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(StoryNotFoundException.class, () -> storyService.getStoryDetails(1L));
+    }
 }
