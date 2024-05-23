@@ -147,16 +147,28 @@ class StoryServiceTest {
     @DisplayName("루트 ID로 시나리오 조회 -> 성공")
     @Test
     void getStoriesByRootId_성공() {
-        when(storyRepository.findAllChildrenByRootId(2L)).thenReturn(Arrays.asList(story, parentStory));
+        when(storyRepository.findAllChildrenByRootId(2L)).thenReturn(Arrays.asList(parentStory, story));
+        when(storyRepository.findParentByChildId(story.getId())).thenReturn(Optional.of(parentStory));
+        when(storyRepository.findParentByChildId(parentStory.getId())).thenReturn(Optional.empty());
 
         List<ScenarioResponseDTO> scenarios = storyService.getStoriesByRootId(2L);
 
         assertThat(scenarios).isNotEmpty();
         assertThat(scenarios.size()).isEqualTo(2);
-        assertThat(scenarios.get(0).getId()).isEqualTo(story.getId());
-        assertThat(scenarios.get(1).getId()).isEqualTo(parentStory.getId());
+
+        assertThat(scenarios.get(0).getId()).isEqualTo(parentStory.getId());
+        assertThat(scenarios.get(0).getParentId()).isNull();
+        assertThat(scenarios.get(0).getImageUrl()).isEqualTo(parentStory.getImageUrl());
+
+        assertThat(scenarios.get(1).getId()).isEqualTo(story.getId());
+        assertThat(scenarios.get(1).getParentId()).isEqualTo(parentStory.getId());
+        assertThat(scenarios.get(1).getImageUrl()).isEqualTo(story.getImageUrl());
+
         verify(storyRepository, times(1)).findAllChildrenByRootId(2L);
+        verify(storyRepository, times(1)).findParentByChildId(story.getId());
+        verify(storyRepository, times(1)).findParentByChildId(parentStory.getId());
     }
+
 
     @DisplayName("루트 ID로 시나리오 조회 -> 존재하지 않는 시나리오")
     @Test
