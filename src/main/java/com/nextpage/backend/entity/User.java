@@ -47,5 +47,14 @@ public class User {
 
         return this;
     }
+
+    public User(Long id, String email, String nickname, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean isDeleted) {
+        this.id = id;
+        this.email = email;
+        this.nickname = nickname;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.isDeleted = isDeleted;
+    }
 }
 
