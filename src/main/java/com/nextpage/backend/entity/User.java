@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Entity
@@ -31,6 +33,10 @@ public class User {
     @Column(name = "\"isDeleted\"", nullable = false)
     private boolean isDeleted;
 
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserBookmark> bookmarks = new HashSet<>();
+
     public User() {
     }
 
@@ -55,6 +61,14 @@ public class User {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.isDeleted = isDeleted;
+    }
+
+    public void addBookmark(UserBookmark bookmark) {
+        bookmarks.add(bookmark);
+    }
+
+    public void removeBookmark(UserBookmark bookmark) {
+        bookmarks.remove(bookmark);
     }
 }
 

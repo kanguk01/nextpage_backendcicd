@@ -32,8 +32,10 @@ public enum ErrorCode {
     IMAGE_DOWNLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "I001", "이미지 다운로드 실패"),
     IMAGE_RESIZE_ERROR(HttpStatus.BAD_REQUEST.value(), "I002", "이미지 리사이징 실패"),
     IMAGE_CONVERSION_ERROR(HttpStatus.BAD_REQUEST.value(), "I003", "Webp 변환 실패"),
-    IMAGE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "I004", "이미지 S3 업로드 실패");
+    IMAGE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "I004", "이미지 S3 업로드 실패"),
 
+    // Bookmark
+    BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "B001", "북마크 목록을 찾을 수 없음");
 
     ;
 

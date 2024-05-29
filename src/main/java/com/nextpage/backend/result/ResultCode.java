@@ -23,7 +23,10 @@ public enum ResultCode {
     STORY_IMAGE_CREATE_SUCCESS("S004","이미지 생성 성공"),
 
     // MYPAGE
-    MYPAGE_MYSTORY_LIST_SUCCESS("M001", "내가 작성한 스토리 조회 성공")
+    MYPAGE_MYSTORY_LIST_SUCCESS("M001", "내가 작성한 스토리 조회 성공"),
+    MYPAGE_BOOKMARK_LIST_SUCCESS("M002","나의 북마크 목록 조회 성공" ),
+    MYPAGE_BOOKMARK_ADD_SUCCESS("M003","북마크 추가 성공" ),
+    MYPAGE_BOOKMARK_DELETE_SUCCESS("M004","북마크 삭제 성공" ),
     ;
 
     private final String code;

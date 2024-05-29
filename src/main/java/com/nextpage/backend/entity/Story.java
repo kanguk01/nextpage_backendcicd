@@ -29,6 +29,10 @@ public class Story {
     private LocalDateTime updatedAt;
     private Boolean isDeleted;
 
+    public Story() {
+
+    }
+
     public Story(final String content, final String imageUrl, LocalDateTime createdAt, LocalDateTime updatedAt, boolean isDeleted, String userNickname, Story parentId) {
         this.content = content;
         this.imageUrl = imageUrl;

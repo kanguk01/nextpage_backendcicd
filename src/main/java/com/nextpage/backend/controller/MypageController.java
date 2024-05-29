@@ -10,13 +10,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.nextpage.backend.result.ResultCode.MYPAGE_MYSTORY_LIST_SUCCESS;
+import static com.nextpage.backend.result.ResultCode.*;
 
 @Tag(name = "Mypage", description = "Mypage 관리")
 @RestController
@@ -35,5 +33,26 @@ public class MypageController {
     public ResponseEntity<ResultResponse> getStoriesByNickname(HttpServletRequest request) {
         List<StoryListResponseDTO> storiesByNickname = mypageService.getStoriesByNickname(request);
         return ResponseEntity.ok(ResultResponse.of(MYPAGE_MYSTORY_LIST_SUCCESS, storiesByNickname));
+    }
+
+    @Operation(summary = "북마크 목록 조회", description = "본인의 북마크 목록을 조회합니다.")
+    @GetMapping("/bookmarks")
+    public ResponseEntity<ResultResponse> getBookmarks(HttpServletRequest request) {
+        List<StoryListResponseDTO> bookmarks = mypageService.getBookmarks(request);
+        return ResponseEntity.ok(ResultResponse.of(MYPAGE_BOOKMARK_LIST_SUCCESS, bookmarks));
+    }
+
+    @Operation(summary = "북마크 추가", description = "스토리를 북마크에 추가합니다.")
+    @PostMapping("/bookmarks/add")
+    public ResponseEntity<ResultResponse> addBookmark(HttpServletRequest request, @RequestParam Long storyId) {
+        mypageService.addBookmark(request, storyId);
+        return ResponseEntity.ok(ResultResponse.of(MYPAGE_BOOKMARK_ADD_SUCCESS));
+    }
+
+    @Operation(summary = "북마크 삭제", description = "스토리를 북마크에서 삭제합니다.")
+    @DeleteMapping ("/bookmarks/{storyId}")
+    public ResponseEntity<ResultResponse> deleteBookmark(HttpServletRequest request, @PathVariable Long storyId) {
+        mypageService.deleteBookmark(request, storyId);
+        return ResponseEntity.ok(ResultResponse.of(MYPAGE_BOOKMARK_DELETE_SUCCESS));
     }
 }
