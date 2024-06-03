@@ -46,13 +46,13 @@ public class MypageController {
     @PostMapping("/bookmarks/add")
     public ResponseEntity<ResultResponse> addBookmark(HttpServletRequest request, @RequestParam Long storyId) {
         mypageService.addBookmark(request, storyId);
-        return ResponseEntity.ok(ResultResponse.of(MYPAGE_BOOKMARK_ADD_SUCCESS, "id = " + storyId));
+        return ResponseEntity.ok(ResultResponse.of(MYPAGE_BOOKMARK_ADD_SUCCESS));
     }
 
     @Operation(summary = "북마크 삭제", description = "스토리를 북마크에서 삭제합니다.")
     @DeleteMapping ("/bookmarks/{storyId}")
     public ResponseEntity<ResultResponse> deleteBookmark(HttpServletRequest request, @PathVariable Long storyId) {
         mypageService.deleteBookmark(request, storyId);
-        return ResponseEntity.ok(ResultResponse.of(MYPAGE_BOOKMARK_DELETE_SUCCESS, "id = " + storyId));
+        return ResponseEntity.ok(ResultResponse.of(MYPAGE_BOOKMARK_DELETE_SUCCESS));
     }
 }
