@@ -3,8 +3,12 @@ package com.nextpage.backend.service;
 import com.nextpage.backend.config.jwt.TokenService;
 import com.nextpage.backend.dto.response.StoryListResponseDTO;
 import com.nextpage.backend.entity.Story;
+import com.nextpage.backend.entity.User;
+import com.nextpage.backend.entity.Bookmark;
+import com.nextpage.backend.error.exception.bookmark.BookmarkNotFoundException;
 import com.nextpage.backend.error.exception.story.StoryNotFoundException;
 import com.nextpage.backend.error.exception.user.UserNotFoundException;
+import com.nextpage.backend.repository.BookmarkRepository;
 import com.nextpage.backend.repository.StoryRepository;
 import com.nextpage.backend.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +40,9 @@ class MypageServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private BookmarkRepository bookmarkRepository;
+
+    @Mock
     private TokenService tokenService;
 
     @InjectMocks
@@ -46,16 +53,25 @@ class MypageServiceTest {
 
     private Story story1;
     private Story story2;
+    private User user;
     private Long userId;
+    private Long storyId1;
+    private Long storyId2;
     private String nickname;
 
     @BeforeEach
     void setUp() {
         userId = 1L;
+        storyId1 = 1L;
+        storyId2 = 2L;
         nickname = "testNickname";
         LocalDateTime now = LocalDateTime.now();
+        user = User.builder()
+                .email("test@example.com")
+                .nickname(nickname)
+                .build();
         story1 = Story.builder()
-                .id(1L)
+                .id(storyId1)
                 .content("Content1")
                 .imageUrl("ImageUrl1")
                 .createdAt(now)
@@ -65,7 +81,7 @@ class MypageServiceTest {
                 .parentId(null)
                 .build();
         story2 = Story.builder()
-                .id(2L)
+                .id(storyId2)
                 .content("Content2")
                 .imageUrl("ImageUrl2")
                 .createdAt(now)
@@ -124,5 +140,134 @@ class MypageServiceTest {
         verify(userRepository, times(1)).findNicknameById(userId);
         verify(storyRepository, times(1)).findStoriesByNickname(nickname);
         verify(userRepository, times(1)).existsByNickname(nickname);
+    }
+
+    @Test
+    @DisplayName("북마크 추가 -> 성공")
+    void addBookmark_성공() {
+        when(tokenService.getUserIdFromToken(request)).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(storyRepository.findById(storyId1)).thenReturn(Optional.of(story1));
+
+        mypageService.addBookmark(request, storyId1);
+
+        verify(tokenService, times(1)).getUserIdFromToken(request);
+        verify(userRepository, times(1)).findById(userId);
+        verify(storyRepository, times(1)).findById(storyId1);
+        verify(bookmarkRepository, times(1)).save(any(Bookmark.class));
+    }
+
+    @Test
+    @DisplayName("북마크 추가 -> 사용자 없음")
+    void addBookmark_사용자_없음() {
+        when(tokenService.getUserIdFromToken(request)).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> mypageService.addBookmark(request, storyId1));
+
+        verify(tokenService, times(1)).getUserIdFromToken(request);
+        verify(userRepository, times(1)).findById(userId);
+        verify(storyRepository, never()).findById(anyLong());
+        verify(bookmarkRepository, never()).save(any(Bookmark.class));
+    }
+
+    @Test
+    @DisplayName("북마크 추가 -> 스토리 없음")
+    void addBookmark_스토리_없음() {
+        when(tokenService.getUserIdFromToken(request)).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(storyRepository.findById(storyId1)).thenReturn(Optional.empty());
+
+        assertThrows(StoryNotFoundException.class, () -> mypageService.addBookmark(request, storyId1));
+
+        verify(tokenService, times(1)).getUserIdFromToken(request);
+        verify(userRepository, times(1)).findById(userId);
+        verify(storyRepository, times(1)).findById(storyId1);
+        verify(bookmarkRepository, never()).save(any(Bookmark.class));
+    }
+
+    @Test
+    @DisplayName("북마크 조회 -> 성공")
+    void getBookmarks_성공() {
+        Bookmark bookmark1 = new Bookmark(user, storyId1);
+        Bookmark bookmark2 = new Bookmark(user, storyId2);
+
+        when(tokenService.getUserIdFromToken(request)).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookmarkRepository.findByUser(user)).thenReturn(Arrays.asList(bookmark1, bookmark2));
+        when(storyRepository.findById(storyId1)).thenReturn(Optional.of(story1));
+        when(storyRepository.findById(storyId2)).thenReturn(Optional.of(story2));
+
+        List<StoryListResponseDTO> result = mypageService.getBookmarks(request);
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getContent()).isEqualTo("Content1");
+        assertThat(result.get(1).getContent()).isEqualTo("Content2");
+
+        verify(tokenService, times(1)).getUserIdFromToken(request);
+        verify(userRepository, times(1)).findById(userId);
+        verify(bookmarkRepository, times(1)).findByUser(user);
+        verify(storyRepository, times(1)).findById(storyId1);
+        verify(storyRepository, times(1)).findById(storyId2);
+    }
+
+    @Test
+    @DisplayName("북마크 조회 -> 사용자 없음")
+    void getBookmarks_사용자_없음() {
+        when(tokenService.getUserIdFromToken(request)).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> mypageService.getBookmarks(request));
+
+        verify(tokenService, times(1)).getUserIdFromToken(request);
+        verify(userRepository, times(1)).findById(userId);
+        verify(bookmarkRepository, never()).findByUser(any(User.class));
+        verify(storyRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    @DisplayName("북마크 삭제 -> 성공")
+    void deleteBookmark_성공() {
+        Bookmark bookmark = new Bookmark(user, storyId1);
+
+        when(tokenService.getUserIdFromToken(request)).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookmarkRepository.findByUserIdAndStoryId(userId, storyId1)).thenReturn(Optional.of(bookmark));
+
+        mypageService.deleteBookmark(request, storyId1);
+
+        verify(tokenService, times(1)).getUserIdFromToken(request);
+        verify(userRepository, times(1)).findById(userId);
+        verify(bookmarkRepository, times(1)).findByUserIdAndStoryId(userId, storyId1);
+        verify(bookmarkRepository, times(1)).delete(bookmark);
+    }
+
+    @Test
+    @DisplayName("북마크 삭제 -> 사용자 없음")
+    void deleteBookmark_사용자_없음() {
+        when(tokenService.getUserIdFromToken(request)).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> mypageService.deleteBookmark(request, storyId1));
+
+        verify(tokenService, times(1)).getUserIdFromToken(request);
+        verify(userRepository, times(1)).findById(userId);
+        verify(bookmarkRepository, never()).findByUserIdAndStoryId(anyLong(), anyLong());
+        verify(bookmarkRepository, never()).delete(any(Bookmark.class));
+    }
+
+    @Test
+    @DisplayName("북마크 삭제 -> 북마크 없음")
+    void deleteBookmark_북마크_없음() {
+        when(tokenService.getUserIdFromToken(request)).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookmarkRepository.findByUserIdAndStoryId(userId, storyId1)).thenReturn(Optional.empty());
+
+        assertThrows(BookmarkNotFoundException.class, () -> mypageService.deleteBookmark(request, storyId1));
+
+        verify(tokenService, times(1)).getUserIdFromToken(request);
+        verify(userRepository, times(1)).findById(userId);
+        verify(bookmarkRepository, times(1)).findByUserIdAndStoryId(userId, storyId1);
+        verify(bookmarkRepository, never()).delete(any(Bookmark.class));
     }
 }
