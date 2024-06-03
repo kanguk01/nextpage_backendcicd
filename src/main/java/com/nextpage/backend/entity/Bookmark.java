@@ -33,15 +33,11 @@ public class Bookmark {
 
     public void addBookmark(User user, Bookmark bookmark) {
         user.getBookmarks().add(bookmark);
-        bookmark.setUser(user);
+        bookmark.user = user;
     }
 
     public void removeBookmark(User user, Bookmark bookmark) {
         user.getBookmarks().remove(bookmark);
-        bookmark.setUser(null);
-    }
-
-    public void setUser(User user) {
-        this.user = user;
+        bookmark.user = null;
     }
 }
