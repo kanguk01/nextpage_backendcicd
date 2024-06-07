@@ -4,12 +4,12 @@ import com.nextpage.backend.config.jwt.TokenService;
 import com.nextpage.backend.dto.response.StoryListResponseDTO;
 import com.nextpage.backend.entity.Story;
 import com.nextpage.backend.entity.User;
-import com.nextpage.backend.entity.UserBookmark;
+import com.nextpage.backend.entity.Bookmark;
 import com.nextpage.backend.error.exception.bookmark.BookmarkNotFoundException;
 import com.nextpage.backend.error.exception.story.StoryNotFoundException;
 import com.nextpage.backend.error.exception.user.UserNotFoundException;
 import com.nextpage.backend.repository.StoryRepository;
-import com.nextpage.backend.repository.UserBookmarkRepository;
+import com.nextpage.backend.repository.BookmarkRepository;
 import com.nextpage.backend.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
@@ -22,13 +22,13 @@ import java.util.List;
 public class MypageService {
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;
-    private final UserBookmarkRepository userBookmarkRepository;
     private final TokenService tokenService;
+    private final BookmarkRepository bookmarkRepository;
 
-    public MypageService(StoryRepository storyRepository, UserRepository userRepository, UserBookmarkRepository userBookmarkRepository, TokenService tokenService) {
+    public MypageService(StoryRepository storyRepository, UserRepository userRepository, BookmarkRepository bookmarkRepository, TokenService tokenService) {
         this.storyRepository = storyRepository;
         this.userRepository = userRepository;
-        this.userBookmarkRepository = userBookmarkRepository;
+        this.bookmarkRepository = bookmarkRepository;
         this.tokenService = tokenService;
     }
 
@@ -61,17 +61,17 @@ public class MypageService {
         Long userId = tokenService.getUserIdFromToken(request);
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         Story story = storyRepository.findById(storyId).orElseThrow(StoryNotFoundException::new);
-        UserBookmark bookmark = new UserBookmark(user, story.getId());
-        user.addBookmark(bookmark);
-        userBookmarkRepository.save(bookmark);
+        Bookmark bookmark = new Bookmark(user, story.getId());
+        bookmark.addBookmark(user, bookmark);
+        bookmarkRepository.save(bookmark);
     }
 
     public List<StoryListResponseDTO> getBookmarks(HttpServletRequest request) { // 북마크 조회
         Long userId = tokenService.getUserIdFromToken(request);
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        List<UserBookmark> bookmarks = userBookmarkRepository.findByUser(user);
+        List<Bookmark> bookmarks = bookmarkRepository.findByUser(user);
         List<StoryListResponseDTO> bookmarkDTO = new ArrayList<>();
-        for (UserBookmark bookmark : bookmarks) {
+        for (Bookmark bookmark : bookmarks) {
             Story story = storyRepository.findById(bookmark.getStoryId()).orElseThrow(StoryNotFoundException::new);
             StoryListResponseDTO dto = new StoryListResponseDTO(
                     story.getId(),
@@ -87,9 +87,9 @@ public class MypageService {
     public void deleteBookmark(HttpServletRequest request, Long storyId) { // 북마크 삭제
         Long userId = tokenService.getUserIdFromToken(request);
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        UserBookmark bookmark = userBookmarkRepository.findByUserIdAndStoryId(userId, storyId)
+        Bookmark bookmark = bookmarkRepository.findByUserIdAndStoryId(userId, storyId)
                 .orElseThrow(BookmarkNotFoundException::new);
-        user.removeBookmark(bookmark);
-        userBookmarkRepository.delete(bookmark);
+        bookmark.removeBookmark(user, bookmark);
+        bookmarkRepository.delete(bookmark);
     }
 }

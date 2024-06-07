@@ -33,9 +33,8 @@ public class User {
     @Column(name = "\"isDeleted\"", nullable = false)
     private boolean isDeleted;
 
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserBookmark> bookmarks = new HashSet<>();
+    private Set<Bookmark> bookmarks = new HashSet<>();
 
     public User() {
     }
@@ -50,7 +49,6 @@ public class User {
     public User update(String nickname) { // 프로필 수정 시 사용
         this.nickname = nickname;
         this.updatedAt = LocalDateTime.now();
-
         return this;
     }
 
@@ -62,13 +60,4 @@ public class User {
         this.updatedAt = updatedAt;
         this.isDeleted = isDeleted;
     }
-
-    public void addBookmark(UserBookmark bookmark) {
-        bookmarks.add(bookmark);
-    }
-
-    public void removeBookmark(UserBookmark bookmark) {
-        bookmarks.remove(bookmark);
-    }
 }
-
