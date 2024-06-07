@@ -4,11 +4,13 @@ import com.nextpage.backend.entity.Story;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
+@ToString
 public class StorySaveRequest {
 
     @NotBlank(message = "imageUrl은 필수입니다.")

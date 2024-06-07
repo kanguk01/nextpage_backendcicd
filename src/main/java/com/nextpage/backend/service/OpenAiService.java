@@ -38,8 +38,9 @@ public class OpenAiService {
                 .block(); // This makes the call synchronous
     }
 
+
     private Map<String, Object> prepareRequestBody(String content) {
-        String prompt = String.format("When generating an image, be sure to observe the following conditions: Do not add text to the image. I want an illustration image, not contain text in the image\nDesign: a detailed digital illustration drawn with bright colors and clean lines. Please make the following images according to the previous requirements: %s", content);
+        String prompt = String.format("When generating an image, be sure to observe the following conditions: Do not add text to the image. I want an illustration image, not contain text in the image\nDesign: a detailed digital illustration drawn with bright colors and clean lines. Please make the following images according to the previous requirements: %s \n Avoid any content that may be considered inappropriate or offensive, ensuring the image aligns with content policies.", content);
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("prompt", prompt);
         requestBody.put("n", 1);
