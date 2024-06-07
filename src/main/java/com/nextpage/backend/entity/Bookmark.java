@@ -3,6 +3,7 @@ package com.nextpage.backend.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,12 +24,20 @@ public class Bookmark {
     @Column(name = "\"storyId\"", nullable = false)
     private Long storyId;
 
+    @Column(name = "\"createdAt\"", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "\"isDeleted\"", nullable = false)
+    private boolean isDeleted;
+
     protected Bookmark() {
     }
 
     public Bookmark(User user, Long storyId) {
         this.user = user;
         this.storyId = storyId;
+        this.createdAt = LocalDateTime.now();
+        this.isDeleted = false;
     }
 
     public void addBookmark(User user, Bookmark bookmark) {
