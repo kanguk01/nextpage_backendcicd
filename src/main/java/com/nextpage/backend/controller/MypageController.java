@@ -29,7 +29,7 @@ public class MypageController {
     }
 
     @Operation(summary = "내가 쓴 스토리 조회", description = "본인이 작성한 스토리를 조회합니다.")
-    @GetMapping("/mystories") // 특정 분기 조회
+    @GetMapping("/mystories")
     public ResponseEntity<ResultResponse> getStoriesByNickname(HttpServletRequest request) {
         List<StoryListResponseDTO> storiesByNickname = mypageService.getStoriesByNickname(request);
         return ResponseEntity.ok(ResultResponse.of(MYPAGE_MYSTORY_LIST_SUCCESS, storiesByNickname));

@@ -58,10 +58,10 @@ public class StoryService {
         return storyRepository.findChildByParentId(story.getId()).stream().map(Story::getContent).toList();
     }
 
-    public void generateStory(StorySaveRequest request, Long parentId, HttpServletRequest httpServletRequest) {
+    public void generateStory(StorySaveRequest request, HttpServletRequest httpServletRequest) {
         String userNickname = getUserNickname(httpServletRequest);
         String s3Url = imageService.uploadImageToS3(request.getImageUrl());
-        Story parentStory = getParentById(parentId);
+        Story parentStory = getParentById(request.getParentId());
         Story story = request.toEntity(userNickname, s3Url, parentStory);
         storyRepository.save(story);
     }
