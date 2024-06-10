@@ -121,14 +121,13 @@ class StoryServiceTest {
     @DisplayName("스토리 생성 -> 성공")
     @Test
     void generateStory_성공() {
-        StorySaveRequest request = new StorySaveRequest("imageUrl", "content");
+        StorySaveRequest request = new StorySaveRequest(-1L, "imageUrl", "content");
 
         when(tokenService.getUserIdFromToken(this.request)).thenReturn(1L);
         when(userRepository.findNicknameById(1L)).thenReturn(Optional.of("testNickname"));
         when(imageService.uploadImageToS3("imageUrl")).thenReturn("s3Url");
-        when(storyRepository.findById(parentStory.getId())).thenReturn(Optional.of(parentStory));
-
-        storyService.generateStory(request, parentStory.getId(), this.request);
+        when(storyRepository.findById(anyLong())).thenReturn(Optional.of(parentStory));
+        storyService.generateStory(request, this.request);
 
         verify(storyRepository, times(1)).save(any(Story.class));
     }
@@ -136,12 +135,12 @@ class StoryServiceTest {
     @DisplayName("스토리 생성 -> 존재하지 않는 유저")
     @Test
     void generateStory_존재하지_않는_유저() {
-        StorySaveRequest request = new StorySaveRequest("imageUrl", "content");
+        StorySaveRequest request = new StorySaveRequest(-1L, "imageUrl", "content");
 
         when(tokenService.getUserIdFromToken(this.request)).thenReturn(1L);
         when(userRepository.findNicknameById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> storyService.generateStory(request, parentStory.getId(), this.request));
+        assertThrows(UserNotFoundException.class, () -> storyService.generateStory(request, this.request));
     }
 
     @DisplayName("루트 ID로 시나리오 조회 -> 성공")
