@@ -61,6 +61,7 @@ public class MypageService {
     }
 
     public void deleteBookmark(HttpServletRequest request, Long storyId) { // 북마크 삭제
+        tokenService.validateAccessToken(request); // 만료 검사
         Long userId = tokenService.getUserIdFromToken(request);
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         Bookmark bookmark = bookmarkRepository.findByUserIdAndStoryId(user.getId(), storyId)

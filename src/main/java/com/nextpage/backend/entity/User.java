@@ -35,19 +35,13 @@ public class User {
     public User() {
     }
 
-    @Builder
-    public User(String email, String nickname) {
-        this.email = email;
-        this.nickname = nickname;
-        this.createdAt = LocalDateTime.now();
-    }
-
     public User update(String nickname) { // 프로필 수정 시 사용
         this.nickname = nickname;
         this.updatedAt = LocalDateTime.now();
         return this;
     }
 
+    @Builder
     public User(Long id, String email, String nickname, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean isDeleted) {
         this.id = id;
         this.email = email;
@@ -55,5 +49,9 @@ public class User {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.isDeleted = isDeleted;
+    }
+
+    public static User of(String email, String nickname) {
+        return User.builder().build();
     }
 }

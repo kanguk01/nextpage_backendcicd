@@ -188,10 +188,10 @@ class StoryServiceTest {
         assertThat(result).isNotEmpty();
 
         assertThat(result.get(0).getId()).isEqualTo(parentStory.getId());
-        assertThat(result.get(0).getUserNickname()).isEqualTo(parentStory.getUserNickname());
+        assertThat(result.get(0).getNickname()).isEqualTo(parentStory.getUserNickname());
 
         assertThat(result.get(1).getId()).isEqualTo(story.getId());
-        assertThat(result.get(1).getUserNickname()).isEqualTo(story.getUserNickname());
+        assertThat(result.get(1).getNickname()).isEqualTo(story.getUserNickname());
 
         verify(storyRepository, times(1)).findRecursivelyByLeafId(1L);
     }
