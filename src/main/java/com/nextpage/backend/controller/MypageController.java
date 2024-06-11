@@ -1,11 +1,9 @@
 package com.nextpage.backend.controller;
 
-import com.nextpage.backend.config.jwt.TokenService;
+import com.nextpage.backend.dto.response.BookmarkResponseDTO;
 import com.nextpage.backend.dto.response.StoryListResponseDTO;
-import com.nextpage.backend.repository.UserRepository;
 import com.nextpage.backend.result.ResultResponse;
 import com.nextpage.backend.service.MypageService;
-import com.nextpage.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,9 +21,8 @@ public class MypageController {
 
     private final MypageService mypageService;
 
-    public MypageController(MypageService mypageService, UserService userService, TokenService tokenService, UserRepository userRepository) {
+    public MypageController(MypageService mypageService) {
         this.mypageService = mypageService;
-
     }
 
     @Operation(summary = "내가 쓴 스토리 조회", description = "본인이 작성한 스토리를 조회합니다.")
@@ -38,19 +35,19 @@ public class MypageController {
     @Operation(summary = "북마크 목록 조회", description = "본인의 북마크 목록을 조회합니다.")
     @GetMapping("/bookmarks")
     public ResponseEntity<ResultResponse> getBookmarks(HttpServletRequest request) {
-        List<StoryListResponseDTO> bookmarks = mypageService.getBookmarks(request);
+        List<BookmarkResponseDTO> bookmarks = mypageService.getBookmarks(request);
         return ResponseEntity.ok(ResultResponse.of(MYPAGE_BOOKMARK_LIST_SUCCESS, bookmarks));
     }
 
     @Operation(summary = "북마크 추가", description = "스토리를 북마크에 추가합니다.")
-    @PostMapping("/bookmarks/add")
-    public ResponseEntity<ResultResponse> addBookmark(HttpServletRequest request, @RequestParam Long storyId) {
+    @PostMapping("/bookmarks/{storyId}")
+    public ResponseEntity<ResultResponse> addBookmark(HttpServletRequest request, @PathVariable Long storyId) {
         mypageService.addBookmark(request, storyId);
         return ResponseEntity.ok(ResultResponse.of(MYPAGE_BOOKMARK_ADD_SUCCESS));
     }
 
     @Operation(summary = "북마크 삭제", description = "스토리를 북마크에서 삭제합니다.")
-    @DeleteMapping ("/bookmarks/{storyId}")
+    @DeleteMapping("/bookmarks/{storyId}")
     public ResponseEntity<ResultResponse> deleteBookmark(HttpServletRequest request, @PathVariable Long storyId) {
         mypageService.deleteBookmark(request, storyId);
         return ResponseEntity.ok(ResultResponse.of(MYPAGE_BOOKMARK_DELETE_SUCCESS));

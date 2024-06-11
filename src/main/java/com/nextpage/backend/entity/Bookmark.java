@@ -1,11 +1,10 @@
 package com.nextpage.backend.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Getter
 @Entity
@@ -17,12 +16,15 @@ public class Bookmark {
     @Column(name = "\"id\"", columnDefinition = "INT")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "\"user\"")
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "\"userId\"", nullable = false)
     private User user;
 
-    @Column(name = "\"storyId\"", nullable = false)
+    @Column(name = "\"storyId\"", columnDefinition = "INT", nullable = false)
     private Long storyId;
+
+    @Column(name = "\"imageUrl\"", nullable = false)
+    private String imageUrl;
 
     @Column(name = "\"createdAt\"", nullable = false)
     private LocalDateTime createdAt;
@@ -33,20 +35,23 @@ public class Bookmark {
     protected Bookmark() {
     }
 
-    public Bookmark(User user, Long storyId) {
+    @Builder
+    public Bookmark(Long id, User user, Long storyId, String imageUrl, LocalDateTime createdAt, boolean isDeleted) {
+        this.id = id;
         this.user = user;
         this.storyId = storyId;
-        this.createdAt = LocalDateTime.now();
-        this.isDeleted = false;
+        this.imageUrl = imageUrl;
+        this.createdAt = createdAt;
+        this.isDeleted = isDeleted;
     }
 
-    public void addBookmark(User user, Bookmark bookmark) {
-        user.getBookmarks().add(bookmark);
-        bookmark.user = user;
-    }
-
-    public void removeBookmark(User user, Bookmark bookmark) {
-        user.getBookmarks().remove(bookmark);
-        bookmark.user = null;
+    public static Bookmark of(User user, Story story) {
+        return Bookmark.builder()
+                .user(user)
+                .storyId(story.getId())
+                .imageUrl(story.getImageUrl())
+                .createdAt(LocalDateTime.now())
+                .isDeleted(false)
+                .build();
     }
 }
