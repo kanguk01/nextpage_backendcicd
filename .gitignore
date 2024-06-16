@@ -5,6 +5,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 monitoring/grafana/
+monitoring/prometheus/
 ### STS ###
 .apt_generated
 .classpath
@@ -42,4 +43,3 @@ out/
 
 ### 데이터 파일
 /nextpage-db
-
