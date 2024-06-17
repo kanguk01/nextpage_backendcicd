@@ -35,12 +35,6 @@ public class User {
     public User() {
     }
 
-    public User update(String nickname) { // 프로필 수정 시 사용
-        this.nickname = nickname;
-        this.updatedAt = LocalDateTime.now();
-        return this;
-    }
-
     @Builder
     public User(Long id, String email, String nickname, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean isDeleted) {
         this.id = id;
@@ -52,6 +46,17 @@ public class User {
     }
 
     public static User of(String email, String nickname) {
-        return User.builder().build();
+        return User.builder()
+                .email(email)
+                .nickname(nickname)
+                .createdAt(LocalDateTime.now())
+                .isDeleted(false)
+                .build();
+    }
+
+    public User update(String nickname) {
+        this.nickname = nickname;
+        this.updatedAt = LocalDateTime.now();
+        return this;
     }
 }
