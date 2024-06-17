@@ -2,9 +2,9 @@ CREATE TABLE "users" (
     "id" SERIAL PRIMARY KEY,
     "email" VARCHAR(255) UNIQUE NOT NULL,
     "nickname" VARCHAR(255) UNIQUE NOT NULL,
-    "createdAt" TIMESTAMP NOT NULL,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP,
-    "isDeleted" BOOLEAN NOT NULL
+    "isDeleted" BOOLEAN DEFAULT FALSE
     );
 
 CREATE TABLE "bookmarks" (
