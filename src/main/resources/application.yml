@@ -69,5 +69,13 @@ springdoc:
   paths-to-match:
     - /api/v2/**
 
-
-
+# 모니터링
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
