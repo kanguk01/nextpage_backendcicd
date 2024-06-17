@@ -8,13 +8,12 @@ import java.time.LocalDateTime;
 
 @Getter
 public class RootResponseDTO {
-    private Long id;
-    private String userNickname;
-    private String content;
-    private String imageUrl;
-    private LocalDateTime createdAt;
+    private final Long id;
+    private final String userNickname;
+    private final String content;
+    private final String imageUrl;
+    private final LocalDateTime createdAt;
 
-    // 아래 코드는 @AllArgsConstructor로 대체 가능 -> @Builder로 빌더 패턴까지 한 번에 작성 가능
     @Builder
     public RootResponseDTO(Long id, String userNickname, String content, String imageUrl) {
         this.id = id;

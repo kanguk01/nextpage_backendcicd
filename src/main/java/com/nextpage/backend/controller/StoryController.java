@@ -1,7 +1,10 @@
 package com.nextpage.backend.controller;
 
 import com.nextpage.backend.dto.request.StorySaveRequest;
-import com.nextpage.backend.dto.response.*;
+import com.nextpage.backend.dto.response.RootResponseDTO;
+import com.nextpage.backend.dto.response.ScenarioResponseDTO;
+import com.nextpage.backend.dto.response.StoryDetailsResponseDTO;
+import com.nextpage.backend.dto.response.StoryListResponseDTO;
 import com.nextpage.backend.result.ResultResponse;
 import com.nextpage.backend.service.OpenAiService;
 import com.nextpage.backend.service.StoryService;
@@ -10,15 +13,16 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.nextpage.backend.result.ResultCode.*;
 
-
+@Slf4j
 @Tag(name = "Stories", description = "Story 관리")
 @RestController
 @RequestMapping("/api/v2/stories") // 공통 api
@@ -50,9 +54,11 @@ public class StoryController {
     @Operation(summary = "스토리 생성", description = "새로운 스토리를 생성합니다.")
     @PostMapping()
     public ResponseEntity<ResultResponse> createStory(@RequestBody @Valid StorySaveRequest storyRequest,
-                                                   @RequestParam(required = false) Long parentId,
                                                    HttpServletRequest request) {
-        storyService.generateStory(storyRequest, parentId, request);
+        log.info("StorySaveRequest: {}", storyRequest);
+        log.info("parentId: {}", storyRequest.getParentId());
+
+        storyService.generateStory(storyRequest, request);
         return ResponseEntity.ok(ResultResponse.of(STORY_CREATE_SUCCESS));
     }
 
@@ -74,7 +80,8 @@ public class StoryController {
 
     @Operation(summary = "이미지 생성", description = "스토리의 관련된 이미지를 생성합니다.")
     @PostMapping("/images")
-    public ResponseEntity<ResultResponse> generateImage(@RequestParam String content) {
+    public ResponseEntity<ResultResponse> generateImage(@RequestBody Map<String, Object> payload) {
+        String content = (String) payload.get("content");
         String imageUrl = openAiService.generateImage(content);
         return ResponseEntity.ok(ResultResponse.of(STORY_IMAGE_CREATE_SUCCESS, imageUrl));
     }
