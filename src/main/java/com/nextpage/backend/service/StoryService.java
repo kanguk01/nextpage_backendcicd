@@ -58,10 +58,10 @@ public class StoryService {
         return storyRepository.findChildByParentId(story.getId()).stream().map(Story::getContent).toList();
     }
 
-    public void generateStory(StorySaveRequest request, Long parentId, HttpServletRequest httpServletRequest) {
+    public void generateStory(StorySaveRequest request, HttpServletRequest httpServletRequest) {
         String userNickname = getUserNickname(httpServletRequest);
         String s3Url = imageService.uploadImageToS3(request.getImageUrl());
-        Story parentStory = getParentById(parentId);
+        Story parentStory = getParentById(request.getParentId());
         Story story = request.toEntity(userNickname, s3Url, parentStory);
         storyRepository.save(story);
     }
@@ -77,7 +77,7 @@ public class StoryService {
         return storyRepository.findById(parentId).orElse(null);
     }
 
-    public List<ScenarioResponseDTO> getStoriesByRootId(Long rootId) { //시나리오 조회
+    public List<ScenarioResponseDTO> getStoriesByRootId(Long rootId) { // 시나리오 조회
         List<Story> result= storyRepository.findAllChildrenByRootId(rootId); //시나리오 조회
         List<ScenarioResponseDTO> stories = new ArrayList<>(); //원하는 부분만 가져오기위해 DTO 설정
         for (Story story : result) {
@@ -95,17 +95,12 @@ public class StoryService {
         return stories;
     }
 
-    public List<StoryListResponseDTO> getStoriesByleafId(Long leafId) { //특정 분기 조회
-        List<Story> result= storyRepository.findRecursivelyByLeafId(leafId);
-        List<StoryListResponseDTO> stories = new ArrayList<>(); //원하는 부분만 가져오기위해 DTO 설정
+    public List<StoryListResponseDTO> getStoriesByleafId(Long leafId) { // 특정 분기 조회
+        List<Story> result = storyRepository.findRecursivelyByLeafId(leafId);
+        List<StoryListResponseDTO> stories = new ArrayList<>(); // 원하는 부분만 가져오기위해 DTO 설정
         for (Story story : result) {
-            StoryListResponseDTO storyListResponseDTO = new StoryListResponseDTO(
-                    story.getId(),
-                    story.getContent(),
-                    story.getImageUrl(),
-                    story.getUserNickname()
-                    ); //각 자식 스토리의 새로운 DTO객체 생성
-            stories.add(storyListResponseDTO); //모든 필요한 부분을 채운 객체를 추가한다.
+            StoryListResponseDTO storyListResponseDTO = StoryListResponseDTO.of(story); // 각 자식 스토리의 새로운 DTO 객체 생성
+            stories.add(storyListResponseDTO); // 모든 필요한 부분을 채운 객체를 추가한다.
         }
         Collections.reverse(stories);
         if (stories.isEmpty()) { throw new StoryNotFoundException(); }
@@ -113,7 +108,7 @@ public class StoryService {
     }
 
     public Long getParentId(Story story){ // 부모 ID 가져오는 함수 분리
-        Long parentId = null; //parentid 가져오는 부분만 따로 지정
+        Long parentId = null; // parentid 가져오는 부분만 따로 지정
         Optional<Story> parentStoryOptional = storyRepository.findParentByChildId(story.getId());
         if (parentStoryOptional.isPresent()) {
             parentId = parentStoryOptional.get().getId();

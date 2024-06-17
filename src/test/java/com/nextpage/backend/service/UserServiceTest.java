@@ -48,7 +48,14 @@ class UserServiceTest {
     @DisplayName("유저 생성 -> 성공")
     @Test
     void createUser_success() {
-        User newUser = new User(1L, "newUser@nextpage.com", "newUser", LocalDateTime.now(), null, false);
+        User newUser = User.builder()
+                .id(1L)
+                .email("newUser@nextpage.com")
+                .nickname("newUser")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(null)
+                .isDeleted(false)
+                .build();
         UserCreateRequest request = UserCreateRequest.builder()
                 .email(newUser.getEmail())
                 .nickname(newUser.getNickname())

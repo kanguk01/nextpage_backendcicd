@@ -1,14 +1,24 @@
 package com.nextpage.backend.dto.response;
 
-import lombok.AllArgsConstructor;
+import com.nextpage.backend.entity.Story;
+import lombok.Builder;
 import lombok.Getter;
 
-@AllArgsConstructor
+@Builder
 @Getter
 public class StoryListResponseDTO {
     private Long id;
     private String content;
     private String imageUrl;
-    private String userNickname;
+    private String nickname;
+
+    public static StoryListResponseDTO of(Story story) {
+        return StoryListResponseDTO.builder()
+                .id(story.getId())
+                .content(story.getContent())
+                .imageUrl(story.getImageUrl())
+                .nickname(story.getUserNickname())
+                .build();
+    }
 
 }

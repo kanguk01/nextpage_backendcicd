@@ -17,14 +17,16 @@ services:
       - npage
 
   postgresql:
+    container_name: postgresql
     image: postgres:12.0-alpine
     restart: always
-    volumes:
-      - ./nextpage-db/postgres-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./nextpage-db/postgres-data:/var/lib/postgresql/data
     ports:
       - 5432:5432
     networks:
@@ -51,27 +53,72 @@ services:
       - npage
 
   # 스프링 로컬로 실행 시 주석 처리하고 DB만 도커 빌드
-#  springboot:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    restart: always
-#    depends_on:
-#      - neo4j
-#      - postgresql
-#    ports:
-#      - 8080:8080
-#    container_name: springboot
-#    environment:
-#      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-#      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-#      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-#      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-#      NEO4J_URI: ${SPRING_NEO4J_URI}
-#      NEO4J_PASSWORD: ${SPRING_NEO4J_PASSWORD}
-#    networks:
-#      - npage
+  springboot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - neo4j
+      - postgresql
+    ports:
+      - 8080:8080
+    container_name: springboot
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      NEO4J_URI: ${SPRING_NEO4J_URI}
+      NEO4J_PASSWORD: ${SPRING_NEO4J_PASSWORD}
+    networks:
+      - npage
+
+  # Monitoring
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    env_file:
+      - './monitoring/grafana/env.grafana'
+    volumes:
+      - './monitoring/grafana:/var/lib/grafana'
+    restart: always
+    environment:
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+    networks:
+      - npage
+
+  k6:
+    image: grafana/k6:latest
+    container_name: k6
+    networks:
+      - npage
+    ports:
+      - "6565:6565"
+    environment:
+      - K6_OUT=influxdb=http://influxdb:8086/k6
+    volumes:
+      - ./monitoring/k6:/scripts
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # 호스트와 연결(로컬테스트를 위함)
+    command: ["run", "/scripts/test_script.js"]
+
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+    restart: on-failure # 실패 시 재시작
+    networks:
+      - npage
 
 networks:
   npage:
     driver: bridge
+
+

@@ -16,7 +16,6 @@ public class Story {
 
     @Id @GeneratedValue
     private Long id;
-
     private String userNickname;
     private String content;
     private String imageUrl;
@@ -30,7 +29,6 @@ public class Story {
     private Boolean isDeleted;
 
     public Story() {
-
     }
 
     public Story(final String content, final String imageUrl, LocalDateTime createdAt, LocalDateTime updatedAt, boolean isDeleted, String userNickname, Story parentId) {
