@@ -32,6 +32,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+
       - name: Create .env file
         run: |
           echo $SECRETS_CONTEXT | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > src/main/resources/env.properties
