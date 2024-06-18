@@ -82,3 +82,4 @@ jobs:
         env:
           SECRETS_CONTEXT: ${{ toJson(secrets) }} 
             $(echo $SECRETS_CONTEXT | jq -r 'to_entries|map("export \(.key)=\(.value|tostring)")|.[]')
+
