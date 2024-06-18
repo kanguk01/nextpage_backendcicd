@@ -1,16 +1,10 @@
-name: CI
+name: CI with Coverage
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-  pull_request:
-    branches:
-      - develop
+  workflow_dispatch:
 
 jobs:
-  build-and-test:
+  build-and-test-with-coverage:
     runs-on: ubuntu-22.04
 
     services:
@@ -76,8 +70,22 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
-      - name: Run Tests
-        run: ./gradlew test
+      - name: Run Tests with Coverage
+        run: ./gradlew test jacocoTestReport
         env:
           SECRETS_CONTEXT: ${{ toJson(secrets) }}
             $(echo $SECRETS_CONTEXT | jq -r 'to_entries|map("export \(.key)=\(.value|tostring)")|.[]')
+
+      - name: Store test results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: build/test-results/test
+
+      - name: Store coverage results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report
+          path: build/reports/jacoco/test/html
