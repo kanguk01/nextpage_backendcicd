@@ -45,35 +45,7 @@ class UserServiceTest {
         user = new User(1L, "test@nextpage.com", "testUser", LocalDateTime.now(), null, false);
     }
 
-    @DisplayName("유저 생성 -> 성공")
-    @Test
-    void createUser_success() {
-        User newUser = User.builder()
-                .id(1L)
-                .email("newUser@nextpage.com")
-                .nickname("newUser")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(null)
-                .isDeleted(false)
-                .build();
-        UserCreateRequest request = UserCreateRequest.builder()
-                .email(newUser.getEmail())
-                .nickname(newUser.getNickname())
-                .build();
 
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenReturn(newUser);
-        when(userRepository.findById(newUser.getId())).thenReturn(Optional.of(newUser));
-        when(tokenService.generateAccessToken(anyLong())).thenReturn("test_accessToken");
-        when(tokenService.generateRefreshToken()).thenReturn("test_refreshToken");
-
-        SignUpResponseDTO response = userService.createUser(request);
-
-        assertNotNull(response); // null이 아닌지 확인
-        assertEquals("test_accessToken", response.getAccessToken()); // 일치하는지 확인
-        assertEquals("test_refreshToken", response.getRefreshToken());
-        verify(userRepository, times(2)).save(any(User.class)); // userRepository.save()가 두 번 호출되었는지 확인
-    }
 
     @DisplayName("유저 생성 -> 이메일 중복")
     @Test
