@@ -117,6 +117,23 @@ services:
     networks:
       - npage
 
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus/config:/etc/prometheus
+      - ./monitoring/prometheus/volume:/prometheus
+    ports:
+      - 9090:9090
+    command:
+      - '--web.enable-lifecycle' # api 재시작없이 설정 파일 reload
+      - '--storage.tsdb.path=/prometheus'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    user: root
+    restart: always
+
 networks:
   npage:
     driver: bridge

@@ -66,7 +66,7 @@ class UserServiceTest {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        User updatedUser = userService.updateUserId(user.getId(), user.getNickname());
+        User updatedUser = userService.updateNickname(user.getId(), user.getNickname());
 
         assertNotNull(updatedUser);
         assertEquals("testUser#1", updatedUser.getNickname()); // 정상적으로 변경됐는지 확인
@@ -78,7 +78,7 @@ class UserServiceTest {
     void updateUserId_userNotFound() {
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> userService.updateUserId(user.getId(), user.getNickname()));
+        assertThrows(UserNotFoundException.class, () -> userService.updateNickname(user.getId(), user.getNickname()));
     }
 
     @DisplayName("유저 삭제 -> 성공")

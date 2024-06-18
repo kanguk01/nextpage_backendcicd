@@ -27,16 +27,13 @@ public class UserService {
         if (userRepository.existsByEmail(email)) { // 이미 존재하는 이메일이면 유저 생성 x
             throw new EmailDuplicationException();
         }
-        User newUser = User.builder()
-                .email(email)
-                .nickname(nickname)
-                .build();
+        User newUser = User.of(email, nickname);
         newUser = userRepository.save(newUser); // db에 유저 저장 - 회원 가입
-        newUser = updateUserId(newUser.getId(), newUser.getNickname());
+        newUser = updateNickname(newUser.getId(), newUser.getNickname()); // 유저 닉네임 뒤에 #{id} 붙이기
         return new SignUpResponseDTO(newUser, tokenService.generateAccessToken(newUser.getId()), tokenService.generateRefreshToken());
     }
 
-    public User updateUserId(Long id, String nickname) {
+    public User updateNickname(Long id, String nickname) {
         User user = userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
         user.update(nickname + "#" + user.getId());
